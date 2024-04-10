@@ -92,9 +92,16 @@ function echoLine($iname, $date, $charges, $ptpaid, $inspaid, $duept, $encounter
     echo "  <td class='text-center' id='td_copay_$var_index' >" . text(FormatMoney::getBucks($copay)) . "</td>\n";
     echo "  <td class='text-center' id='balance_$var_index'>" . text(FormatMoney::getBucks($balance)) . "</td>\n";
     echo "  <td class='text-center' id='duept_$var_index'>" . text(FormatMoney::getBucks(round($duept, 2) * 1)) . "</td>\n";
-    echo "  <td class='text-right'><input type='text' class='form-control' name='" . attr($iname) . "'  id='paying_" . attr($var_index) . "' " .
+    echo "  <td class='text-right'><input type='number' min='0.0' class='form-control' name='" . attr($iname) . "'  id='paying_" . attr($var_index) . "' " .
         " value='' onchange='coloring();calctotal()'  autocomplete='off' " .
-        "onkeyup='calctotal()'/></td>\n";
+        "onkeyup='calctotal()' pattern=\"^[0-9]+(\.[0-9]+)?$\" oninput='validatePositiveNumber(this);'/></td>\n";
+    echo "<script>
+    function validatePositiveNumber(inputField) {
+    const inputValue = parseFloat(inputField.value);
+    if (isNaN(inputValue) || inputValue <= 0) {
+        inputField.value = inputField.value.slice(0, -1) || '';
+    }
+    }</script>";
     echo " </tr>\n";
 }
 
@@ -854,6 +861,10 @@ function validate(notSubmit = false) {
         }
         if (ename.indexOf('form_upay[') === 0 || ename.indexOf('form_bpay[') === 0) {
             if (Number(f.elements[i].value) !== 0) flgempty = false;
+            if (Number(f.elements[i].value) < 0){
+                alert(<?php echo xlj('A Positive Payment is Required!. Please input a positive payment line item entry.'); ?>);
+                return false;
+            }
         }
     }
     if (flgempty) {
